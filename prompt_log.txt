@@ -1,0 +1,17 @@
+AI Models Used: Claude AI (March 2026 version)
+
+Initial PDF document provided with first prompt: https://docs.google.com/document/d/19vzkvMjsChquPAhpBnuuRqIfDan0LdFH0x1afLwMdm4/edit?usp=sharing
+I am trying to recreate fire boy and water girl game. I have attached an outline of what i want this game to work and look like as well as other requirments. could you please provide me a step-by-step plan to achieve this.
+
+do you have any questions for me that will help with the implementation of each step?
+
+Q: How should the level be designed?
+A: Hardcode one level to start
+Q: What should happen when a player dies?
+A: Show game over screen immediately
+Q: What visual style do you want to start with?
+A: Doesn't matter, functionality first
+Q: Which features do you want in the first version? (Select all that apply)
+A: Collectible gems, Main menu screen
+
+Don't build the entire code at once please go step by step and don't move on to the next step until my confirmation
