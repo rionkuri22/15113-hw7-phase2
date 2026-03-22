@@ -260,9 +260,22 @@ class Game:
     # check_win_condition — both players must reach their own exit door to win
     # -------------------------------------------------------------------------
     def check_win_condition(self):
-        fireboy_at_exit   = self.fireboy.has_reached_exit(self.level.exit_doors)
-        watergirl_at_exit = self.watergirl.has_reached_exit(self.level.exit_doors)
+        # Light up doors when correct player is nearby
+        fireboy_at_exit = False
+        watergirl_at_exit = False
+        for door in self.level.exit_doors:
+            if door.door_type == "fireboy":
+                door.is_lit = self.fireboy.rect.colliderect(door.rect)
+                if door.is_lit:
+                    fireboy_at_exit = True
+            elif door.door_type == "watergirl":
+                door.is_lit = self.watergirl.rect.colliderect(door.rect)
+                if door.is_lit:
+                    watergirl_at_exit = True
+        # Both must be at their doors simultaneously
         if fireboy_at_exit and watergirl_at_exit:
+            for door in self.level.exit_doors:
+                door.is_open = True
             self.state = GameState.WIN
 
     # =========================================================================

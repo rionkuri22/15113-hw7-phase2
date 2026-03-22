@@ -28,21 +28,20 @@ from settings import (
 #   X = Fireboy exit door              Y = Watergirl exit door
 # =============================================================================
 LEVEL_GRID = [
-    # col: 0         9        18
     "####################",  # 0  ceiling
-    "#.R.....B......XZ..#",  # 1  corridor 1: gems, X=Fireboy door col14, Z=Watergirl door col15
-    "#.............######",  # 2  right landing pad (cols14-19 solid so players can reach doors)
-    "##############.....#",  # 3  PLATFORM 1: right notch cols14-18 (jump up from right)
-    "#..................#",  # 4  corridor 2 row A
-    "#.......L..........#",  # 5  corridor 2 row B  (lever col8)
-    "#.....##############",  # 6  PLATFORM 2: left notch cols1-5 (jump up from left)
-    "#..................#",  # 7  corridor 3 row A
-    "#...........B..V...#",  # 8  corridor 3 row B  (blue gem col11, button col15)
-    "##############.....#",  # 9  PLATFORM 3: right notch cols14-18
-    "#..................#",  # 10 corridor 4 row A
-    "#.R.......Y........#",  # 11 corridor 4 row B  (red gem col2, yellow platform col10)
-    "#.....##############",  # 12 PLATFORM 4: left notch cols1-5 (players jump up here from bottom)
-    "#12...F.....W.....B#",  # 13 spawns col1+2; fire col6; water col12; blue gem col18
+    "#.R..B.............#",  # 1  top corridor - gems
+    "#................XZ#",  # 2  top corridor - doors far right
+    "###..###############",  # 3  PLATFORM: gap cols 3-4 (LEFT opening)
+    "#..................#",  # 4  corridor 2
+    "#..................#",  # 5  corridor 2
+    "###############..###",  # 6  PLATFORM: gap cols 15-16 (RIGHT opening)
+    "#..........WW......#",  # 7  corridor 3 + water pool cols 11-12
+    "#..............B...#",  # 8  corridor 3 + blue gem
+    "###..###############",  # 9  PLATFORM: gap cols 3-4 (LEFT opening)
+    "#...FF.............#",  # 10 corridor 4 + fire pool cols 4-5
+    "#............R.....#",  # 11 corridor 4 + red gem
+    "###############..###",  # 12 PLATFORM: gap cols 15-16 (RIGHT opening)
+    "#1.............G..2#",  # 13 spawns + green ooze cols 14-15
     "####################",  # 14 floor
 ]
 
@@ -189,13 +188,32 @@ class ExitDoor:
         self.door_type  = door_type
         self.color      = COLOR_DOOR_RED if door_type == "fireboy" else COLOR_DOOR_BLUE
         self.rect       = pygame.Rect(x_pixels, y_pixels, TILE_SIZE, TILE_SIZE)
-        self.is_open    = False  # Could be used later to animate the door
+        self.is_open    = False
+        self.is_lit     = False  # True when the correct player is in the zone
 
     def draw(self, screen):
+        # Door background
         pygame.draw.rect(screen, self.color, self.rect)
-        # Draw a small white arch shape to suggest a doorway
+        # Arch shape
         inner = self.rect.inflate(-10, -4)
         pygame.draw.rect(screen, (255, 255, 255), inner, 2)
+        # Symbol: fire triangle / water drop
+        cx, cy = self.rect.centerx, self.rect.centery - 2
+        if self.door_type == "fireboy":
+            # Fire triangle symbol
+            pts = [(cx, cy - 8), (cx - 6, cy + 6), (cx + 6, cy + 6)]
+            pygame.draw.polygon(screen, (255, 100, 30), pts)
+        else:
+            # Water drop symbol
+            pts = [(cx, cy - 8), (cx - 6, cy + 4), (cx + 6, cy + 4)]
+            pygame.draw.polygon(screen, (60, 160, 255), pts)
+            pygame.draw.circle(screen, (60, 160, 255), (cx, cy + 4), 6)
+        # Glow when lit
+        if self.is_lit:
+            glow = pygame.Surface((TILE_SIZE + 8, TILE_SIZE + 8), pygame.SRCALPHA)
+            glow_color = (255, 200, 50, 80) if self.door_type == "fireboy" else (50, 200, 255, 80)
+            glow.fill(glow_color)
+            screen.blit(glow, (self.rect.x - 4, self.rect.y - 4))
 
 
 # =============================================================================

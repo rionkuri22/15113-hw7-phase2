@@ -137,7 +137,7 @@ def draw_win_screen(screen, fonts, fireboy_gems, watergirl_gems):
     screen.blit(overlay, (0, 0))
 
     # Heading
-    heading = fonts.large.render("YOU WIN!", True, (255, 215, 0))  # Gold
+    heading = fonts.large.render("Cleared Level 1!", True, (255, 215, 0))  # Gold
     screen.blit(heading, (SCREEN_WIDTH // 2 - heading.get_width() // 2, 160))
 
     # Gem totals
