@@ -10,7 +10,8 @@ from settings import (
     TILE_SIZE, COLOR_DARK_GRAY, COLOR_BG,
     COLOR_FIRE_POOL, COLOR_WATER_POOL, COLOR_GREEN_LAKE,
     COLOR_GEM_RED, COLOR_GEM_BLUE,
-    COLOR_DOOR_RED, COLOR_DOOR_BLUE
+    COLOR_DOOR_RED, COLOR_DOOR_BLUE,
+    COLOR_LEVEL_PINK, COLOR_LEVEL_YELLOW, COLOR_LEVEL_PURPLE, COLOR_LEVEL_BLOCK
 )
 
 # =============================================================================
@@ -27,22 +28,102 @@ from settings import (
 #   X = Fireboy exit door              Y = Watergirl exit door
 # =============================================================================
 LEVEL_GRID = [
-    "####################",  # row 0  — ceiling
-    "#1.....R......B...2#",  # row 1  — top platform (spawns + gems)
-    "###################.",  # row 2  — solid floor under row 1 (right gap)
-    "#......#............",  # row 3  — mid-left platform
-    "#.FFFF.#....WWWW...#",  # row 4  — fire pool left, water pool right
-    "########.......####.",  # row 5  — floor with gap in middle
-    "#...........R......#",  # row 6  — open area with gem
-    "#.GGG.....GGGG.....#",  # row 7  — green lakes
-    "#######.......######",  # row 8  — platform with gap
-    "#....B.....R.......#",  # row 9  — gems on lower level
-    "#.WWWW.....FFFF....#",  # row 10 — water left, fire right
-    "########.......#####",  # row 11 — platform with gap
-    "#X.................#",  # row 12 — Fireboy door on left
-    "#.................Y#",  # row 13 — Watergirl door on right
-    "####################",  # row 14 — floor
+    # col: 0         9        18
+    "####################",  # 0  ceiling
+    "#.R.....B......XZ..#",  # 1  corridor 1: gems, X=Fireboy door col14, Z=Watergirl door col15
+    "#.............######",  # 2  right landing pad (cols14-19 solid so players can reach doors)
+    "##############.....#",  # 3  PLATFORM 1: right notch cols14-18 (jump up from right)
+    "#..................#",  # 4  corridor 2 row A
+    "#.......L..........#",  # 5  corridor 2 row B  (lever col8)
+    "#.....##############",  # 6  PLATFORM 2: left notch cols1-5 (jump up from left)
+    "#..................#",  # 7  corridor 3 row A
+    "#...........B..V...#",  # 8  corridor 3 row B  (blue gem col11, button col15)
+    "##############.....#",  # 9  PLATFORM 3: right notch cols14-18
+    "#..................#",  # 10 corridor 4 row A
+    "#.R.......Y........#",  # 11 corridor 4 row B  (red gem col2, yellow platform col10)
+    "#.....##############",  # 12 PLATFORM 4: left notch cols1-5 (players jump up here from bottom)
+    "#12...F.....W.....B#",  # 13 spawns col1+2; fire col6; water col12; blue gem col18
+    "####################",  # 14 floor
 ]
+
+# =============================================================================
+# Interactive Objects
+# =============================================================================
+
+class Lever:
+    def __init__(self, x, y):
+        # Lever is at the bottom of the tile
+        self.rect = pygame.Rect(x, y + TILE_SIZE//2, TILE_SIZE, TILE_SIZE//2)
+        self.state = False  # False = off, True = on
+
+    def draw(self, screen):
+        color = COLOR_LEVEL_YELLOW
+        pygame.draw.rect(screen, color, self.rect)
+        # Draw a simple toggle line
+        start_x = self.rect.centerx
+        start_y = self.rect.bottom
+        end_x = self.rect.centerx + (15 if self.state else -15)
+        end_y = self.rect.top - 5
+        pygame.draw.line(screen, (255, 255, 255), (start_x, start_y), (end_x, end_y), 3)
+
+class Button:
+    def __init__(self, x, y):
+        # Button is a small rectangular strip on the floor
+        self.rect = pygame.Rect(x + 5, y + TILE_SIZE - 8, TILE_SIZE - 10, 8)
+        self.is_pressed = False
+
+    def draw(self, screen):
+        color = COLOR_LEVEL_PINK
+        h = 3 if self.is_pressed else 8
+        r = pygame.Rect(self.rect.x, self.rect.bottom - h, self.rect.width, h)
+        pygame.draw.rect(screen, color, r)
+
+class MovingPlatform:
+    def __init__(self, x, y, color):
+        # Platform is 2 tiles wide
+        self.rect = pygame.Rect(x, y, TILE_SIZE * 2, 10)
+        self.start_y = y
+        self.end_y = y - 100 # Moves up 100 pixels
+        self.color = color
+        self.is_active = False
+
+    def update(self):
+        target_y = self.end_y if self.is_active else self.start_y
+        if abs(self.rect.y - target_y) > 2:
+            if self.rect.y < target_y:
+                self.rect.y += 2
+            else:
+                self.rect.y -= 2
+        else:
+            self.rect.y = target_y
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, self.rect)
+
+class PushableBlock:
+    def __init__(self, x, y):
+        self.rect = pygame.Rect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4)
+        self.velocity_y = 0
+        self.is_on_ground = False
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, COLOR_LEVEL_BLOCK, self.rect)
+        pygame.draw.rect(screen, (150, 150, 150), self.rect, 2)
+
+    def update(self, gravity, tiles):
+        self.velocity_y += gravity
+        self.rect.y += int(self.velocity_y)
+        self.is_on_ground = False
+        for tile in tiles:
+            if self.rect.colliderect(tile.rect):
+                if self.velocity_y > 0:
+                    self.rect.bottom = tile.rect.top
+                    self.velocity_y = 0
+                    self.is_on_ground = True
+                elif self.velocity_y < 0:
+                    self.rect.top = tile.rect.bottom
+                    self.velocity_y = 0
+
 
 
 # =============================================================================
@@ -126,6 +207,10 @@ class Level:
         self.hazard_zones        = []   # Fire, water, green lake zones
         self.gems                = []   # Collectible gems
         self.exit_doors          = []   # Fireboy and Watergirl exit doors
+        self.levers              = []
+        self.buttons             = []
+        self.moving_platforms    = []
+        self.blocks              = []
         self.fireboy_spawn       = (0, 0)  # Pixel position for Fireboy start
         self.watergirl_spawn     = (0, 0)  # Pixel position for Watergirl start
         self._parse_grid()
@@ -154,8 +239,23 @@ class Level:
                 elif cell_char == "X":
                     self.exit_doors.append(ExitDoor(x, y, "fireboy"))
 
-                elif cell_char == "Y":
+                elif cell_char == "Z":
                     self.exit_doors.append(ExitDoor(x, y, "watergirl"))
+
+                elif cell_char == "L":
+                    self.levers.append(Lever(x, y))
+
+                elif cell_char == "V":
+                    self.buttons.append(Button(x, y))
+
+                elif cell_char == "Y":
+                    self.moving_platforms.append(MovingPlatform(x, y, COLOR_LEVEL_YELLOW))
+
+                elif cell_char == "P":
+                    self.moving_platforms.append(MovingPlatform(x, y, COLOR_LEVEL_PURPLE))
+
+                elif cell_char == "S":
+                    self.blocks.append(PushableBlock(x, y))
 
                 elif cell_char == "1":
                     self.fireboy_spawn = (x, y)

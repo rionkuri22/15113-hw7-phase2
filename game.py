@@ -9,7 +9,8 @@
 import pygame
 from settings import (
     SCREEN_WIDTH, SCREEN_HEIGHT, FPS, WINDOW_TITLE,
-    LEVEL_TIME_LIMIT
+    LEVEL_TIME_LIMIT, GRAVITY,
+    COLOR_LEVEL_YELLOW, COLOR_LEVEL_PURPLE
 )
 from level   import Level
 from players import Fireboy, Watergirl
@@ -59,6 +60,7 @@ class Game:
         self.watergirl      = Watergirl(*self.level.watergirl_spawn)
         self.time_remaining = LEVEL_TIME_LIMIT
         self.game_over_reason = ""
+        self.last_lever_touch = {}
 
     # =========================================================================
     # MAIN LOOP
@@ -147,6 +149,7 @@ class Game:
         self.tick_timer(delta_time)
         self.handle_player_input()
         self.apply_gravity_to_players()
+        self.handle_interactive_objects()
         self.resolve_player_collisions()
         self.check_player_hazards()
         self.check_gem_collection()
@@ -181,8 +184,50 @@ class Game:
     # resolve_player_collisions — pushes players out of solid tiles
     # -------------------------------------------------------------------------
     def resolve_player_collisions(self):
-        self.fireboy.resolve_tile_collisions(self.level.tiles)
-        self.watergirl.resolve_tile_collisions(self.level.tiles)
+        # Merge tiles and moving platforms for collision
+        collision_tiles = self.level.tiles + self.level.moving_platforms + self.level.blocks
+        self.fireboy.resolve_tile_collisions(collision_tiles)
+        self.watergirl.resolve_tile_collisions(collision_tiles)
+
+    def handle_interactive_objects(self):
+        # Update blocks
+        for block in self.level.blocks:
+            block.update(GRAVITY, self.level.tiles)
+            # Players can push blocks
+            if self.fireboy.rect.colliderect(block.rect):
+                if self.fireboy.velocity_x > 0:
+                    block.rect.left = self.fireboy.rect.right
+                elif self.fireboy.velocity_x < 0:
+                    block.rect.right = self.fireboy.rect.left
+            if self.watergirl.rect.colliderect(block.rect):
+                if self.watergirl.velocity_x > 0:
+                    block.rect.left = self.watergirl.rect.right
+                elif self.watergirl.velocity_x < 0:
+                    block.rect.right = self.watergirl.rect.left
+
+        # Update buttons
+        for button in self.level.buttons:
+            button.is_pressed = self.fireboy.rect.colliderect(button.rect) or \
+                               self.watergirl.rect.colliderect(button.rect)
+            for block in self.level.blocks:
+                if block.rect.colliderect(button.rect):
+                    button.is_pressed = True
+
+        # Update levers (simple toggle on contact)
+        for i, lever in enumerate(self.level.levers):
+            is_touching = self.fireboy.rect.colliderect(lever.rect) or self.watergirl.rect.colliderect(lever.rect)
+            if is_touching and not self.last_lever_touch.get(i, False):
+                lever.state = not lever.state
+            self.last_lever_touch[i] = is_touching
+
+        # Update platforms
+        for platform in self.level.moving_platforms:
+            if platform.color == COLOR_LEVEL_YELLOW:
+                # In our Level 1, we only have one lever
+                platform.is_active = any(l.state for l in self.level.levers)
+            elif platform.color == COLOR_LEVEL_PURPLE:
+                platform.is_active = any(b.is_pressed for b in self.level.buttons)
+            platform.update()
 
     # -------------------------------------------------------------------------
     # check_player_hazards — ends the game if either player touches a fatal zone

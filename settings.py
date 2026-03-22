@@ -47,5 +47,10 @@ COLOR_GEM_BLUE   = (50,  50,  255)  # Watergirl collectible gem
 COLOR_DOOR_RED   = (180, 30,  30)   # Fireboy exit door
 COLOR_DOOR_BLUE  = (30,  30,  180)  # Watergirl exit door
 
+COLOR_LEVEL_PINK   = (255, 105, 180)
+COLOR_LEVEL_YELLOW = (255, 215, 0)
+COLOR_LEVEL_PURPLE = (147, 112, 219)
+COLOR_LEVEL_BLOCK  = (100, 100, 100)
+
 COLOR_TIMER_OK   = (255, 255, 255)  # Timer text — plenty of time
 COLOR_TIMER_WARN = (255, 80,  80)   # Timer text — under 10 seconds
