@@ -38,3 +38,5 @@ Actually put red pond and the red and blue gems that are currently at the top al
 Put pond underground= as part of block under it.
 
 Give chatacters ability to jump more space sideways when right or left arrow key pressed alongside the jump up arrow key. The maximum jump dsitance should be just enough to allow jump over the ponds.
+
+Add a lever, button, push box and moving platform. All should be on one of these rows: 2, 5, 8, 11, 13

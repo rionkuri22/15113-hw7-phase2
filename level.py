@@ -30,7 +30,7 @@ from settings import (
 LEVEL_GRID = [
     "####################",  # 0  ceiling
     "#..................#",  # 1  top corridor A
-    "#.R.B.FF.........XZ#",  # 2  top corridor B (Gems & Fire Pond)
+    "#.R.B.FF..S......XZ#",  # 2  top corridor B (Gems, Fire Pond, Push Block)
     "###..###############",  # 3  PLATFORM gap cols 3-4
     "#..................#",  # 4  corridor 2 A
     "#..L.....GG........#",  # 5  corridor 2 B (Lever & Green Pond)
@@ -38,7 +38,7 @@ LEVEL_GRID = [
     "#..................#",  # 7  corridor 3 A
     "#..............BV..#",  # 8  corridor 3 B (Blue Gem & Button)
     "###..###############",  # 9  PLATFORM gap cols 3-4
-    "#.S................#",  # 10 corridor 4 A (Push Block)
+    "#..................#",  # 10 corridor 4 A
     "#....WW.........RY.#",  # 11 corridor 4 B (Water Pond, Red Gem, Platform)
     "###############..###",  # 12 PLATFORM gap cols 15-16
     "#1................2#",  # 13 bottom floor (Spawns)
@@ -298,6 +298,18 @@ class Level:
 
         for gem in self.gems:
             gem.draw(screen)
+
+        for lever in self.levers:
+            lever.draw(screen)
+
+        for button in self.buttons:
+            button.draw(screen)
+
+        for platform in self.moving_platforms:
+            platform.draw(screen)
+
+        for block in self.blocks:
+            block.draw(screen)
 
         for door in self.exit_doors:
             door.draw(screen)
