@@ -13,7 +13,7 @@
 
 import pygame
 from settings import (
-    PLAYER_SPEED, JUMP_STRENGTH, GRAVITY,
+    PLAYER_SPEED, JUMP_STRENGTH, GRAVITY, AIR_SPEED_MULTIPLIER,
     TILE_SIZE, COLOR_FIREBOY, COLOR_WATERGIRL,
     COLOR_WHITE
 )
@@ -50,10 +50,12 @@ class Player:
     # move_left / move_right — set horizontal velocity for this frame
     # -------------------------------------------------------------------------
     def move_left(self):
-        self.velocity_x = -PLAYER_SPEED
+        speed = PLAYER_SPEED * (AIR_SPEED_MULTIPLIER if not self.is_on_ground else 1.0)
+        self.velocity_x = -speed
 
     def move_right(self):
-        self.velocity_x = PLAYER_SPEED
+        speed = PLAYER_SPEED * (AIR_SPEED_MULTIPLIER if not self.is_on_ground else 1.0)
+        self.velocity_x = speed
 
     def stop_horizontal_movement(self):
         self.velocity_x = 0

@@ -29,19 +29,19 @@ from settings import (
 # =============================================================================
 LEVEL_GRID = [
     "####################",  # 0  ceiling
-    "#.R..B.............#",  # 1  top corridor - gems
-    "#................XZ#",  # 2  top corridor - doors far right
-    "###..###############",  # 3  PLATFORM: gap cols 3-4 (LEFT opening)
-    "#..................#",  # 4  corridor 2
-    "#..................#",  # 5  corridor 2
-    "###############..###",  # 6  PLATFORM: gap cols 15-16 (RIGHT opening)
-    "#..........WW......#",  # 7  corridor 3 + water pool cols 11-12
-    "#..............B...#",  # 8  corridor 3 + blue gem
-    "###..###############",  # 9  PLATFORM: gap cols 3-4 (LEFT opening)
-    "#...FF.............#",  # 10 corridor 4 + fire pool cols 4-5
-    "#............R.....#",  # 11 corridor 4 + red gem
-    "###############..###",  # 12 PLATFORM: gap cols 15-16 (RIGHT opening)
-    "#1.............G..2#",  # 13 spawns + green ooze cols 14-15
+    "#..................#",  # 1  top corridor A
+    "#.R.B.FF.........XZ#",  # 2  top corridor B (Gems & Fire Pond)
+    "###..###############",  # 3  PLATFORM gap cols 3-4
+    "#..................#",  # 4  corridor 2 A
+    "#..L.....GG........#",  # 5  corridor 2 B (Lever & Green Pond)
+    "###############..###",  # 6  PLATFORM gap cols 15-16
+    "#..................#",  # 7  corridor 3 A
+    "#..............BV..#",  # 8  corridor 3 B (Blue Gem & Button)
+    "###..###############",  # 9  PLATFORM gap cols 3-4
+    "#.S................#",  # 10 corridor 4 A (Push Block)
+    "#....WW.........RY.#",  # 11 corridor 4 B (Water Pond, Red Gem, Platform)
+    "###############..###",  # 12 PLATFORM gap cols 15-16
+    "#1................2#",  # 13 bottom floor (Spawns)
     "####################",  # 14 floor
 ]
 
@@ -150,7 +150,9 @@ class HazardZone:
     }
 
     def __init__(self, x_pixels, y_pixels, grid_char):
-        self.rect = pygame.Rect(x_pixels, y_pixels, TILE_SIZE, TILE_SIZE)
+        # Recess the hazard into the floor below its grid position
+        # We start it 5 pixels above the floor line to ensure collision when walking over
+        self.rect = pygame.Rect(x_pixels, y_pixels + TILE_SIZE - 5, TILE_SIZE, TILE_SIZE // 2)
         self.hazard_type, self.color = self.HAZARD_MAP[grid_char]
 
     def draw(self, screen):

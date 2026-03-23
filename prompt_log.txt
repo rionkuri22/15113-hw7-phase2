@@ -1,3 +1,4 @@
+# Phase 1
 AI Models Used: Claude AI (March 2026 version)
 
 Initial PDF document provided with first prompt: https://docs.google.com/document/d/19vzkvMjsChquPAhpBnuuRqIfDan0LdFH0x1afLwMdm4/edit?usp=sharing
@@ -15,3 +16,25 @@ Q: Which features do you want in the first version? (Select all that apply)
 A: Collectible gems, Main menu screen
 
 Don't build the entire code at once please go step by step and don't move on to the next step until my confirmation
+
+# Phase 2
+While keeping everything else the same, change layout of the paths and walls to match this pic in everything like height and width. The agent should play the game and make sure that the paths actually leda to the end goal of the door and that any jumps are realistically makeable.
+
+Here is info on how the lever, button and moving platform work: Levers and Buttons: One character must stand on a button or hold a lever (stand by the lever) to keep a door open while the other passes through. Levers will stay in place after you pull them, but buttons will not.
+Moving Platforms: These are controlled by pulleys. One character needs to stand on one side of a lift to weigh it down so that the other can reach a higher ledge.
+
+Refer back to this image and make sure the paths are a zig zag or made up of multiple letter "s"s.
+
+Implement the following to teh doors at the end. 
+Color Matching: There are always two distinct doors at the end of the puzzle. One has a red fire symbol on it, and the other has a blue water symbol. Fireboy must go to the red door, and Watergirl must go to the blue door. They cannot swap.
+The Activation Zone: When the correct character stands directly in front of their matching door, the symbol on the door will light up, signaling that the character is in the right place.
+Simultaneous Presence: This is the core rule of the game—nobody gets left behind. The level will not end if only one character is at their door. Both characters must be standing in front of their respective, lit-up doors at the exact same time.
+The Trigger: Once the game's code detects that Fireboy is in the red door's zone and Watergirl is in the blue door's zone simultaneously, it triggers the end-of-level sequence, opening the doors and showing screen sagying cleared level 1.
+
+Put red pond on row 4, green pond on row 6 and blue pond on row 13.
+
+Actually put red pond and the red and blue gems that are currently at the top all on row 2. Green pond on row 5. Blue pond on row 11.
+
+Put pond underground= as part of block under it.
+
+Give chatacters ability to jump more space sideways when right or left arrow key pressed alongside the jump up arrow key. The maximum jump dsitance should be just enough to allow jump over the ponds.
